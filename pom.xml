@@ -11,7 +11,8 @@
 
     <name>Encrypted HTTP Multipart Upload</name>
     <description>
-        Implementations of Commons Fileupload 'FileItemFactory' and 'FileItem' that provide transparent encryption of file uploads if they get cached on disk as temporary files.
+        Implementations of Commons Fileupload 'FileItemFactory' and 'FileItem' that provide transparent encryption of
+        file uploads if they get cached on disk as temporary files.
     </description>
     <url>https://github.com/davidcarboni/encrypted-file-upload</url>
 
@@ -61,11 +62,6 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5</version>
-        </dependency>
 
         <!-- Encryption -->
         <dependency>
@@ -73,31 +69,14 @@
             <artifactId>cryptolite</artifactId>
             <version>1.3.0</version>
             <exclusions>
+                <!-- Bouncycastle can be excluded as a dependency
+                because we don't need the additional features it provides. -->
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-
-
-        <!-- Commons -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.davidcarboni</groupId>
-            <artifactId>resource-utils</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-
 
         <!-- Test -->
         <dependency>
