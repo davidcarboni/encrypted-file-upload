@@ -1,4 +1,4 @@
-package com.github.davidcarboni.thetrain.upload;
+package com.github.davidcarboni.encryptedfileupload;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;

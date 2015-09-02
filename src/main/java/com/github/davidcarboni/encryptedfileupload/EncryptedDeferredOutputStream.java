@@ -1,4 +1,4 @@
-package com.github.davidcarboni.thetrain.upload;
+package com.github.davidcarboni.encryptedfileupload;
 
 import com.github.davidcarboni.cryptolite.Crypto;
 import org.apache.commons.io.IOUtils;
