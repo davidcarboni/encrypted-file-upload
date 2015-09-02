@@ -5,9 +5,49 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.davidcarboni</groupId>
-    <artifactId>the-train-destination</artifactId>
+    <artifactId>encrypted-</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
+    <name>Encrypted HTTP Multipart Upload</name>
+    <description>
+        Implementations of Commons Fileupload 'FileItemFactory' and 'FileItem' that provide transparent encryption of file uploads if they get cached on disk as temporary files.
+    </description>
+    <url>https://github.com/davidcarboni/encrypted-file-upload</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Carboni</name>
+        <url>https://github.com/carboni/</url>
+    </organization>
+
+    <scm>
+        <url>https://github.com/davidcarboni/encrypted-file-upload</url>
+        <connection>scm:git:git://github.com/davidcarboni/encrypted-file-upload.git</connection>
+        <developerConnection>scm:git:git@github.com:davidcarboni/encrypted-file-upload.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Sonatype Nexus release repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,32 +55,12 @@
 
     <dependencies>
 
-
-        <!-- Restolino -->
-        <dependency>
-            <groupId>com.github.davidcarboni</groupId>
-            <artifactId>restolino</artifactId>
-            <version>0.1.8</version>
-        </dependency>
-
-
-        <!-- http -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.4.1</version>
-        </dependency>
+        <!-- Commons fileupload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.davidcarboni</groupId>
-            <artifactId>httpino</artifactId>
-            <version>0.0.3</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
@@ -92,15 +112,15 @@
 
     <build>
 
+        <!-- Include the README, NOTICE and LICENSE files: -->
         <resources>
-            <!-- Standard resources -->
             <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <!-- Your static content - this will end up in target/web/ -->
-            <resource>
-                <directory>src/main/web</directory>
-                <targetPath>${project.build.directory}/web</targetPath>
+                <directory>${project.basedir}</directory>
+                <includes>
+                    <include>README*</include>
+                    <include>NOTICE*</include>
+                    <include>LICENSE*</include>
+                </includes>
             </resource>
         </resources>
 
@@ -110,7 +130,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -118,52 +138,121 @@
                 </configuration>
             </plugin>
 
-            <!-- An assembly that includes all dependencies for deployment: -->
+            <!-- Ensure the manifest contains artifact version information: -->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.5.3</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.github.davidcarboni.restolino.Main</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <!-- Source JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- A folder of dependencies is used in development when reloading classes: -->
+            <!-- Javadoc JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
                 <executions>
                     <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
+                        <id>attach-javadoc</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>jar</goal>
                         </goals>
-                        <!-- Default output folder is ${project.build.directory}/dependency -->
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Release configuration: -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                </configuration>
+            </plugin>
+
+            <!-- Deployment -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.6</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>sonatype-nexus-staging</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
             </plugin>
 
         </plugins>
     </build>
 
+    <profiles>
+
+        <!-- GPG Signature on release -->
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+    <developers>
+        <developer>
+            <id>david</id>
+            <name>David Carboni</name>
+            <email>david@carboni.io</email>
+            <organization>Carboni</organization>
+            <organizationUrl>https://github.com/carboni</organizationUrl>
+            <url>https://github.com/davidcarboni</url>
+        </developer>
+    </developers>
 
 </project>
