@@ -19,7 +19,7 @@ import static java.lang.String.format;
 
 /**
  * Based on {@link org.apache.commons.fileupload.disk.DiskFileItem DiskFileItem}.
- * <p/>
+ *
  * This class adds encryption if data are written to disk.
  */
 public class EncryptedFileItem implements FileItem {
@@ -290,7 +290,7 @@ public class EncryptedFileItem implements FileItem {
      * Returns the contents of the file as a String, using the default
      * character encoding.  This method uses {@link #get()} to retrieve the
      * contents of the file.
-     * <p/>
+     *
      * <b>TODO</b> Consider making this method throw UnsupportedEncodingException.
      *
      * @return The contents of the file, as a string.
@@ -313,11 +313,11 @@ public class EncryptedFileItem implements FileItem {
      * is not concerned with whether or not the item is stored in memory, or on
      * disk in a temporary location. They just want to write the uploaded item
      * to a file.
-     * <p/>
+     *
      * This implementation first attempts to rename the uploaded item to the
      * specified destination file, if the item was originally written to disk.
      * Otherwise, the data will be copied to the specified file.
-     * <p/>
+     *
      * This method is only guaranteed to work <em>once</em>, the first time it
      * is invoked for a particular item. This is because, in the event that the
      * method renames a temporary file, that file will no longer be available
@@ -556,7 +556,7 @@ public class EncryptedFileItem implements FileItem {
 
     /**
      * // TODO: this probably won't play nicely with encryption.
-     * <p/>
+     *
      * Writes the state of this object during serialization.
      *
      * @param out The stream to which the state should be written.
@@ -577,7 +577,7 @@ public class EncryptedFileItem implements FileItem {
 
     /**
      * // TODO: this probably won't play nicely with encryption.
-     * <p/>
+     *
      * Reads the state of this object during deserialization.
      *
      * @param in The stream from which the state should be read.

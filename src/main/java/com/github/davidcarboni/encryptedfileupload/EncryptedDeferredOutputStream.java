@@ -10,7 +10,7 @@ import java.io.*;
 
 /**
  * Based on {@link org.apache.commons.io.output.DeferredFileOutputStream DeferredOutputStream}.
- * <p/>
+ *
  * This class adds encryption if data are written to disk.
  */
 public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
@@ -74,6 +74,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      *
      * @param threshold  The number of bytes at which to trigger an event.
      * @param outputFile The file to which data is saved beyond the threshold.
+     * @param key        The encryption key to use.
      */
     public EncryptedDeferredOutputStream(int threshold, File outputFile, SecretKey key) {
         this(threshold, outputFile, null, null, null, key);
@@ -88,6 +89,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * @param prefix    Prefix to use for the temporary file.
      * @param suffix    Suffix to use for the temporary file.
      * @param directory Temporary file directory.
+     * @param key        The encryption key to use.
      * @since 1.4
      */
     public EncryptedDeferredOutputStream(int threshold, String prefix, String suffix, File directory, SecretKey key) {
@@ -106,6 +108,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * @param prefix     Prefix to use for the temporary file.
      * @param suffix     Suffix to use for the temporary file.
      * @param directory  Temporary file directory.
+     * @param key        The encryption key to use.
      */
     private EncryptedDeferredOutputStream(int threshold, File outputFile, String prefix, String suffix, File directory, SecretKey key) {
         super(threshold);
@@ -190,10 +193,10 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
     /**
      * Returns either the output file specified in the constructor or
      * the temporary file created or null.
-     * <p/>
+     *
      * If the constructor specifying the file is used then it returns that
      * same output file, even when threshold has not been reached.
-     * <p/>
+     *
      * If constructor specifying a temporary file prefix/suffix is used
      * then the temporary file created once the threshold is reached is returned
      * If the threshold was not reached then {@code null} is returned.
