@@ -262,10 +262,14 @@ public class EncryptedFileItem implements FileItem {
             return cachedContent;
         }
 
-        byte[] fileData = new byte[(int) getSize()];
-
-        try (InputStream fis = new Crypto().decrypt(new BufferedInputStream(new FileInputStream(dfos.getFile())), key);) {
-            fis.read(fileData);
+        // Read(byte[]) seems to only read 512 bytes.
+        // This may be something to do with CipherInputStream
+        // so we use IOUtils.copy(...) instead of read(...)
+        byte[] fileData;
+        try (InputStream input = new Crypto().decrypt(new BufferedInputStream( new FileInputStream(dfos.getFile())), key);
+             ByteArrayOutputStream output = new ByteArrayOutputStream((int) getSize())) {
+            IOUtils.copy(input, output);
+            fileData = output.toByteArray();
         } catch (IOException e) {
             fileData = null;
         }
