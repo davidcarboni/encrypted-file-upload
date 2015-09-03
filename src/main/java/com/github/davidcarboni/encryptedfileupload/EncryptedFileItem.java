@@ -273,9 +273,6 @@ public class EncryptedFileItem implements FileItem {
         try {
             fis = new Crypto().decrypt(new BufferedInputStream( new FileInputStream(dfos.getFile())), key);
             IOUtils.readFully(fis, fileData);
-             //ByteArrayOutputStream output = new ByteArrayOutputStream((int) getSize())) {
-            //IOUtils.copy(input, output);
-            //fileData = output.toByteArray();
         } catch (IOException e) {
             fileData = null;
         } finally {
