@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Unit test for items with varying sizes.
  *
- * @version $Id: StreamingTest.java 1454693 2013-03-09 12:30:27Z simonetripodi $
+ * Based on: {@code org.apache.commons.fileupload.StreamingTest} 1454693 2013-03-09 12:30:27Z simonetripodi $
  */
 public class StreamingTest extends TestCase {
 

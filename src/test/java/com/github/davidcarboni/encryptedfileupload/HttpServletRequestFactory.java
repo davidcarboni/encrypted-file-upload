@@ -21,7 +21,7 @@ import org.apache.commons.fileupload.FileUploadBase;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @version $Id: HttpServletRequestFactory.java 1565246 2014-02-06 13:40:52Z ggregory $
+ * Based on: {@code org.apache.commons.fileupload.HttpServletRequestFactory} 1565246 2014-02-06 13:40:52Z ggregory $
  */
 final class HttpServletRequestFactory {
 

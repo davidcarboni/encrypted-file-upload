@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Base class for deriving test cases.
  *
- * @version $Id: FileUploadTestCase.java 1454693 2013-03-09 12:30:27Z simonetripodi $
+ * Based on: {@code org.apache.commons.fileupload.FileUploadTestCase} 1454693 2013-03-09 12:30:27Z simonetripodi $
  */
 public abstract class FileUploadTestCase {
 

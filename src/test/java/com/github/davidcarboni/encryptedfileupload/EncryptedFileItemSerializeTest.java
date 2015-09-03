@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
  * Serialization Unit tests for
  *  {@link com.github.davidcarboni.encryptedfileupload.EncryptedFileItem}.
  *
- * Based on: $Id: DiskFileItemSerializeTest.java 1568860 2014-02-16 23:35:02Z sebb $
+ * Based on: {@code org.apache.commons.fileupload.DiskFileItemSerializeTest} 1568860 2014-02-16 23:35:02Z sebb $
  */
 public class EncryptedFileItemSerializeTest {
 

@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 /**
  * Unit test for items with varying sizes.
  *
- * @version $Id: SizesTest.java 1568663 2014-02-15 18:26:14Z sebb $
+ * Based on: {@code org.apache.commons.fileupload.SizesTest} 1568663 2014-02-15 18:26:14Z sebb $
  */
 public class SizesTest extends FileUploadTestCase {
 

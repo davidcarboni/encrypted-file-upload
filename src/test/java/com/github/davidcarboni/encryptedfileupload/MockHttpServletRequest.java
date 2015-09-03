@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * @version $Id: MockHttpServletRequest.java 1565255 2014-02-06 13:49:17Z ggregory $
+ * Based on: {@code org.apache.commons.fileupload.MockHttpServletRequest} 1565255 2014-02-06 13:49:17Z ggregory $
  */
 class MockHttpServletRequest implements HttpServletRequest {
 
