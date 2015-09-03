@@ -18,14 +18,11 @@ package com.github.davidcarboni.encryptedfileupload;
 
 import org.apache.commons.fileupload.FileUploadBase;
 
-import javax.servlet.ReadListener;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import java.io.*;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -511,7 +508,7 @@ class MockHttpServletRequest implements HttpServletRequest {
             return in.read(b, off, len);
         }
 
-        // Additional methods to be overridden in servlet 3
+        // Additional methods to be overridden
 
         @Override
         public boolean isFinished() {
@@ -529,6 +526,81 @@ class MockHttpServletRequest implements HttpServletRequest {
         }
     }
 
-    // Additional methods to be overridden in servlet 3
+    // Additional methods to be overridden
+
+    @Override
+    public String changeSessionId() {
+        return null;
+    }
+
+    @Override
+    public long getContentLengthLong() {
+        return getContentLength();
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return false;
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+
+    }
+
+    @Override
+    public void logout() throws ServletException {
+
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        return null;
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        return false;
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        return false;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        return null;
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        return null;
+    }
 
 }
