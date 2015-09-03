@@ -241,7 +241,9 @@ public class EncryptedFileItem implements FileItem {
         } else if (dfos.isInMemory()) {
             return dfos.getData().length;
         } else {
-            return dfos.getFile().length();
+            // Use the count of bytes written, rather than the file size
+            // because encrypted file size will differ from cleartext size:
+            return dfos.getByteCount();
         }
     }
 
@@ -613,7 +615,8 @@ public class EncryptedFileItem implements FileItem {
         if (cachedContent != null) {
             output.write(cachedContent);
         } else {
-            FileInputStream input = new FileInputStream(dfosFile);
+            // Decrypt and re-encrypt the data into the new file
+            InputStream input = new Crypto().decrypt( new FileInputStream(dfosFile), key);
             IOUtils.copy(input, output);
             dfosFile.delete();
             dfosFile = null;
