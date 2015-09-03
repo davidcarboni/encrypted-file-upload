@@ -154,11 +154,12 @@ public class EncryptedFileItem implements FileItem {
     // ------------------------------- Methods from javax.activation.DataSource
 
     /**
-     * Returns an {@link java.io.InputStream InputStream} that can be
+     * Returns an {@link InputStream InputStream} that can be
      * used to retrieve the contents of the file.
      *
-     * @return An {@link java.io.InputStream InputStream} that can be
+     * @return An {@link InputStream InputStream} that can be
      * used to retrieve the contents of the file.
+     *
      * @throws IOException if an error occurs.
      */
     public InputStream getInputStream()
@@ -252,11 +253,12 @@ public class EncryptedFileItem implements FileItem {
      * contents of the file were not yet cached in memory, they will be
      * loaded from the disk storage and cached.
      *
-     * @return The contents of the file as an array of bytes.
+     * @return The contents of the file as an array of bytes
+     * or {@code null} if the data cannot be read
      */
     public byte[] get() {
         if (isInMemory()) {
-            if (cachedContent == null) {
+            if (cachedContent == null && dfos != null) {
                 cachedContent = dfos.getData();
             }
             return cachedContent;
@@ -265,13 +267,19 @@ public class EncryptedFileItem implements FileItem {
         // Read(byte[]) seems to only read 512 bytes.
         // This may be something to do with CipherInputStream
         // so we use IOUtils.copy(...) instead of read(...)
-        byte[] fileData;
-        try (InputStream input = new Crypto().decrypt(new BufferedInputStream( new FileInputStream(dfos.getFile())), key);
-             ByteArrayOutputStream output = new ByteArrayOutputStream((int) getSize())) {
-            IOUtils.copy(input, output);
-            fileData = output.toByteArray();
+        byte[] fileData = new byte[(int) getSize()];
+        InputStream fis = null;
+
+        try {
+            fis = new Crypto().decrypt(new BufferedInputStream( new FileInputStream(dfos.getFile())), key);
+            IOUtils.readFully(fis, fileData);
+             //ByteArrayOutputStream output = new ByteArrayOutputStream((int) getSize())) {
+            //IOUtils.copy(input, output);
+            //fileData = output.toByteArray();
         } catch (IOException e) {
             fileData = null;
+        } finally {
+            IOUtils.closeQuietly(fis);
         }
 
         return fileData;
@@ -283,7 +291,9 @@ public class EncryptedFileItem implements FileItem {
      * contents of the file.
      *
      * @param charset The charset to use.
+     *
      * @return The contents of the file, as a string.
+     *
      * @throws UnsupportedEncodingException if the requested character
      *                                      encoding is not available.
      */
@@ -331,6 +341,7 @@ public class EncryptedFileItem implements FileItem {
      *
      * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
+     *
      * @throws Exception if an error occurs.
      */
     public void write(File file) throws Exception {
@@ -339,10 +350,9 @@ public class EncryptedFileItem implements FileItem {
             try {
                 fout = new FileOutputStream(file);
                 fout.write(get());
+                fout.close();
             } finally {
-                if (fout != null) {
-                    fout.close();
-                }
+            	IOUtils.closeQuietly(fout);
             }
         } else {
             File outputFile = getStoreLocation();
@@ -350,34 +360,19 @@ public class EncryptedFileItem implements FileItem {
                 // Save the length of the file
                 size = outputFile.length();
                 /*
-                 * The uploaded file is being stored on disk
-                 * in a temporary location so needs decrypting
+                 * The uploaded file is encrypted on disk
+                 * in a temporary location so must be decrypted
                  * into the desired file.
                  */
-                BufferedInputStream in = null;
-                BufferedOutputStream out = null;
+                InputStream in = null;
+                OutputStream out = null;
                 try {
-                    in = new BufferedInputStream(
-                            new Crypto().decrypt(
-                                    new FileInputStream(outputFile), key));
-                    out = new BufferedOutputStream(
-                            new FileOutputStream(file));
+                    in = new Crypto().decrypt(new FileInputStream(outputFile), key);
+                    out = new FileOutputStream(file);
                     IOUtils.copy(in, out);
                 } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            // ignore
-                        }
-                    }
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            // ignore
-                        }
-                    }
+                    IOUtils.closeQuietly(in);
+                    IOUtils.closeQuietly(out);
                 }
             } else {
                 /*
@@ -410,7 +405,9 @@ public class EncryptedFileItem implements FileItem {
      * this file item.
      *
      * @return The name of the form field.
-     * @see #setFieldName(java.lang.String)
+     *
+     * @see #setFieldName(String)
+     *
      */
     public String getFieldName() {
         return fieldName;
@@ -420,7 +417,9 @@ public class EncryptedFileItem implements FileItem {
      * Sets the field name used to reference this file item.
      *
      * @param fieldName The name of the form field.
+     *
      * @see #getFieldName()
+     *
      */
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
@@ -432,7 +431,9 @@ public class EncryptedFileItem implements FileItem {
      *
      * @return <code>true</code> if the instance represents a simple form
      * field; <code>false</code> if it represents an uploaded file.
+     *
      * @see #setFormField(boolean)
+     *
      */
     public boolean isFormField() {
         return isFormField;
@@ -444,18 +445,21 @@ public class EncryptedFileItem implements FileItem {
      *
      * @param state <code>true</code> if the instance represents a simple form
      *              field; <code>false</code> if it represents an uploaded file.
+     *
      * @see #isFormField()
+     *
      */
     public void setFormField(boolean state) {
         isFormField = state;
     }
 
     /**
-     * Returns an {@link java.io.OutputStream OutputStream} that can
+     * Returns an {@link OutputStream OutputStream} that can
      * be used for storing the contents of the file.
      *
-     * @return An {@link java.io.OutputStream OutputStream} that can be used
-     * for storing the contensts of the file.
+     * @return An {@link OutputStream OutputStream} that can be used
+     *         for storing the contents of the file.
+     *
      * @throws IOException if an error occurs.
      */
     public OutputStream getOutputStream()
@@ -470,11 +474,11 @@ public class EncryptedFileItem implements FileItem {
     // --------------------------------------------------------- Public methods
 
     /**
-     * Returns the {@link java.io.File} object for the <code>FileItem</code>'s
+     * Returns the {@link File} object for the <code>FileItem</code>'s
      * data's temporary location on the disk. Note that for
      * <code>FileItem</code>s that have their data stored in memory,
      * this method will return <code>null</code>. When handling large
-     * files, you can use {@link java.io.File#renameTo(java.io.File)} to
+     * files, you can use {@link File#renameTo(File)} to
      * move the file to new location without copying the data, if the
      * source and destination locations reside within the same logical
      * volume.
@@ -486,6 +490,9 @@ public class EncryptedFileItem implements FileItem {
         if (dfos == null) {
             return null;
         }
+        if (isInMemory()) {
+        	return null;
+        }
         return dfos.getFile();
     }
 
@@ -496,6 +503,9 @@ public class EncryptedFileItem implements FileItem {
      */
     @Override
     protected void finalize() {
+        if (dfos == null) {
+            return;
+        }
         File outputFile = dfos.getFile();
 
         if (outputFile != null && outputFile.exists()) {
@@ -504,12 +514,15 @@ public class EncryptedFileItem implements FileItem {
     }
 
     /**
-     * Creates and returns a {@link java.io.File File} representing a uniquely
+     * Creates and returns a {@link File File} representing a uniquely
      * named temporary file in the configured repository path. The lifetime of
      * the file is tied to the lifetime of the <code>FileItem</code> instance;
      * the file will be deleted when the instance is garbage collected.
      *
-     * @return The {@link java.io.File File} to be used for temporary storage.
+     * <b>Note: Subclasses that override this method must ensure that they return the
+     * same File each time.</b>
+     *
+     * @return The {@link File File} to be used for temporary storage.
      */
     protected File getTempFile() {
         if (tempFile == null) {
@@ -529,7 +542,7 @@ public class EncryptedFileItem implements FileItem {
 
     /**
      * Returns an identifier that is unique within the class loader used to
-     * load this class, but does not have random-like apearance.
+     * load this class, but does not have random-like appearance.
      *
      * @return A String with the non-random looking instance identifier.
      */
@@ -561,11 +574,10 @@ public class EncryptedFileItem implements FileItem {
     // -------------------------------------------------- Serialization methods
 
     /**
-     * // TODO: this probably won't play nicely with encryption.
-     *
      * Writes the state of this object during serialization.
      *
      * @param out The stream to which the state should be written.
+     *
      * @throws IOException if an error occurs.
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -582,11 +594,10 @@ public class EncryptedFileItem implements FileItem {
     }
 
     /**
-     * // TODO: this probably won't play nicely with encryption.
-     *
      * Reads the state of this object during deserialization.
      *
      * @param in The stream from which the state should be read.
+     *
      * @throws IOException            if an error occurs.
      * @throws ClassNotFoundException if class cannot be found.
      */
@@ -622,6 +633,7 @@ public class EncryptedFileItem implements FileItem {
             // Decrypt and re-encrypt the data into the new file
             InputStream input = new Crypto().decrypt( new FileInputStream(dfosFile), key);
             IOUtils.copy(input, output);
+            IOUtils.closeQuietly(input);
             dfosFile.delete();
             dfosFile = null;
         }
@@ -632,7 +644,6 @@ public class EncryptedFileItem implements FileItem {
 
     /**
      * Returns the file item headers.
-     *
      * @return The file items headers.
      */
     public FileItemHeaders getHeaders() {
@@ -641,7 +652,6 @@ public class EncryptedFileItem implements FileItem {
 
     /**
      * Sets the file item headers.
-     *
      * @param pHeaders The file items headers.
      */
     public void setHeaders(FileItemHeaders pHeaders) {

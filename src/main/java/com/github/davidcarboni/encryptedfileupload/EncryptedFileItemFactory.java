@@ -71,7 +71,9 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      * than the configured size threshold.
      *
      * @return The directory in which temporary files will be located.
-     * @see #setRepository(java.io.File)
+     *
+     * @see #setRepository(File)
+     *
      */
     public File getRepository() {
         return repository;
@@ -82,7 +84,9 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      * than the configured size threshold.
      *
      * @param repository The directory in which temporary files will be located.
+     *
      * @see #getRepository()
+     *
      */
     public void setRepository(File repository) {
         this.repository = repository;
@@ -93,6 +97,7 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      * disk. The default value is 10240 bytes.
      *
      * @return The size threshold, in bytes.
+     *
      * @see #setSizeThreshold(int)
      */
     public int getSizeThreshold() {
@@ -103,7 +108,9 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      * Sets the size threshold beyond which files are written directly to disk.
      *
      * @param sizeThreshold The size threshold, in bytes.
+     *
      * @see #getSizeThreshold()
+     *
      */
     public void setSizeThreshold(int sizeThreshold) {
         this.sizeThreshold = sizeThreshold;
@@ -122,6 +129,7 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      *                    <code>false</code> otherwise.
      * @param fileName    The name of the uploaded file, if any, as supplied
      *                    by the browser or other client.
+     *
      * @return The newly created file item.
      */
     public FileItem createItem(String fieldName, String contentType,
