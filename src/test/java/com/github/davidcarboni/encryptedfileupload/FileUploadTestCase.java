@@ -18,7 +18,6 @@ package com.github.davidcarboni.encryptedfileupload;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +38,7 @@ public abstract class FileUploadTestCase {
     }
 
     protected List<FileItem> parseUpload(byte[] bytes, String contentType) throws FileUploadException {
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         HttpServletRequest request = new MockHttpServletRequest(bytes, contentType);
 
         List<FileItem> fileItems = upload.parseRequest(request);

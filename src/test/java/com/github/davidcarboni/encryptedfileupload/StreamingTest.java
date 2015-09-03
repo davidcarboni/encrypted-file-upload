@@ -19,7 +19,6 @@ package com.github.davidcarboni.encryptedfileupload;
 import junit.framework.TestCase;
 import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.FileUploadBase.IOFileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
@@ -156,7 +155,7 @@ public class StreamingTest extends TestCase {
         String contentType = "multipart/form-data; boundary=---1234";
 
         FileUploadBase upload = new ServletFileUpload();
-        upload.setFileItemFactory(new DiskFileItemFactory());
+        upload.setFileItemFactory(new EncryptedFileItemFactory());
         HttpServletRequest request = new MockHttpServletRequest(pStream,
                 pLength, contentType);
 
@@ -168,7 +167,7 @@ public class StreamingTest extends TestCase {
         String contentType = "multipart/form-data; boundary=---1234";
 
         FileUploadBase upload = new ServletFileUpload();
-        upload.setFileItemFactory(new DiskFileItemFactory());
+        upload.setFileItemFactory(new EncryptedFileItemFactory());
         HttpServletRequest request = new MockHttpServletRequest(pStream,
                 pLength, contentType);
 

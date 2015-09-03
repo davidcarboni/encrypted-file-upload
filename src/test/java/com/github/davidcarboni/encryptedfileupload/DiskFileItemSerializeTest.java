@@ -18,7 +18,6 @@ package com.github.davidcarboni.encryptedfileupload;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -31,14 +30,14 @@ import static org.junit.Assert.*;
 
 /**
  * Serialization Unit tests for
- *  {@link org.apache.commons.fileupload.disk.DiskFileItem}.
+ *  {@link com.github.davidcarboni.encryptedfileupload.EncryptedFileItem}.
  *
  * @version $Id: DiskFileItemSerializeTest.java 1568860 2014-02-16 23:35:02Z sebb $
  */
 public class DiskFileItemSerializeTest {
 
     // Use a private repo to catch any files left over by tests
-    private static final File REPO = new File(System.getProperty("java.io.tmpdir"), "diskfileitemrepo");
+    private static final File REPO = new File(System.getProperty("java.io.tmpdir"), "encryptedfileitemrepo");
 
     @Before
     public void setUp() throws Exception {
@@ -225,7 +224,7 @@ public class DiskFileItemSerializeTest {
      * Create a FileItem with the specfied content bytes and repository.
      */
     private FileItem createFileItem(byte[] contentBytes, File repository) {
-        FileItemFactory factory = new DiskFileItemFactory(threshold, repository);
+        FileItemFactory factory = new EncryptedFileItemFactory(threshold, repository);
         String textFieldName = "textField";
 
         FileItem item = factory.createItem(

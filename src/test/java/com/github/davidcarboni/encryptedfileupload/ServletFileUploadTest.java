@@ -20,7 +20,6 @@ import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
 
@@ -381,7 +380,7 @@ public class ServletFileUploadTest extends FileUploadTestCase {
                       "value2\r\n" +
                       "-----1234--\r\n";
         byte[] bytes = text.getBytes("US-ASCII");
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         HttpServletRequest request = new MockHttpServletRequest(bytes, CONTENT_TYPE);
 
         Map<String, List<FileItem>> mappedParameters = upload.parseParameterMap(request);
