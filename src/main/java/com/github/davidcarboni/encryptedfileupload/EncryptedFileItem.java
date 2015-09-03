@@ -123,7 +123,7 @@ public class EncryptedFileItem implements FileItem {
     // ----------------------------------------------------------- Constructors
 
     /**
-     * Constructs a new <code>DiskFileItem</code> instance.
+     * Constructs a new <code>EncryptedFileItem</code> instance.
      *
      * @param fieldName     The name of the form field.
      * @param contentType   The content type passed by the browser or
@@ -590,7 +590,7 @@ public class EncryptedFileItem implements FileItem {
         in.defaultReadObject();
 
         /* One expected use of serialization is to migrate HTTP sessions
-         * containing a DiskFileItem between JVMs. Particularly if the JVMs are
+         * containing a EncryptedFileItem between JVMs. Particularly if the JVMs are
          * on different machines It is possible that the repository location is
          * not valid so validate it.
          */

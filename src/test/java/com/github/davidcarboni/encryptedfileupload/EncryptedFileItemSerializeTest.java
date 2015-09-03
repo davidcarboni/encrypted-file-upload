@@ -32,9 +32,9 @@ import static org.junit.Assert.*;
  * Serialization Unit tests for
  *  {@link com.github.davidcarboni.encryptedfileupload.EncryptedFileItem}.
  *
- * @version $Id: DiskFileItemSerializeTest.java 1568860 2014-02-16 23:35:02Z sebb $
+ * Based on: $Id: DiskFileItemSerializeTest.java 1568860 2014-02-16 23:35:02Z sebb $
  */
-public class DiskFileItemSerializeTest {
+public class EncryptedFileItemSerializeTest {
 
     // Use a private repo to catch any files left over by tests
     private static final File REPO = new File(System.getProperty("java.io.tmpdir"), "encryptedfileitemrepo");
