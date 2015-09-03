@@ -18,9 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.String.format;
 
 /**
- * Based on {@link org.apache.commons.fileupload.disk.DiskFileItem DiskFileItem}.
+ * This class encrypts uploaded data if they are written to disk.
  *
- * This class adds encryption if data are written to disk.
+ * Based on {@code org.apache.commons.fileupload.disk.DiskFileItem} 1643123 2014-12-03 14:10:11Z tn $ - {@code commons-fileupload 1.4-SNAPSHOT}.
  */
 public class EncryptedFileItem implements FileItem {
 

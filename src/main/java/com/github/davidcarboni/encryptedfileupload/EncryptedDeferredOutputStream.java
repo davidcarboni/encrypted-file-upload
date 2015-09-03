@@ -9,7 +9,7 @@ import javax.crypto.SecretKey;
 import java.io.*;
 
 /**
- * Based on {@link org.apache.commons.io.output.DeferredFileOutputStream DeferredOutputStream}.
+ * Based on {@link org.apache.commons.io.output.DeferredFileOutputStream DeferredOutputStream} in {@code commons-io-2.2.jar}.
  *
  * This class adds encryption if data are written to disk.
  */

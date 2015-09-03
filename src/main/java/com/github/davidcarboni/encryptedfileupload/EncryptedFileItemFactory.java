@@ -7,9 +7,9 @@ import org.apache.commons.io.FileCleaningTracker;
 import java.io.File;
 
 /**
- * Based on {@link org.apache.commons.fileupload.disk.DiskFileItemFactory DiskFileItem}.
+ * This class encrypts uploaded data if they are written to disk.
  *
- * This class adds encryption if data are written to disk.
+ * Based on {@code org.apache.commons.fileupload.disk.DiskFileItemFactory} 1564788 2014-02-05 14:36:41Z markt $ - {@code commons-fileupload 1.4-SNAPSHOT}.
  */
 public class EncryptedFileItemFactory implements FileItemFactory {
 
