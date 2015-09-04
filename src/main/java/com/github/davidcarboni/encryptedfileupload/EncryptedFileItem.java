@@ -264,9 +264,6 @@ public class EncryptedFileItem implements FileItem {
             return cachedContent;
         }
 
-        // Read(byte[]) seems to only read 512 bytes.
-        // This may be something to do with CipherInputStream
-        // so we use IOUtils.copy(...) instead of read(...)
         byte[] fileData = new byte[(int) getSize()];
         InputStream fis = null;
 
