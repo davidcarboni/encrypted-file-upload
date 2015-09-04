@@ -9,11 +9,13 @@ import javax.crypto.SecretKey;
 import java.io.*;
 
 /**
- * Based on {@link org.apache.commons.io.output.DeferredFileOutputStream DeferredOutputStream} in {@code commons-io-2.2.jar}.
- *
  * This class adds encryption if data are written to disk.
+ *
+ * Based on {@link org.apache.commons.io.output.DeferredFileOutputStream DeferredOutputStream} 1304052 2012-03-22 20:55:29Z ggregory $ in {@code commons-io-2.2.jar}.
  */
-public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
+public class EncryptedDeferredOutputStream
+        extends ThresholdingOutputStream
+{
 
     // ----------------------------------------------------------- Data members
 
@@ -131,7 +133,8 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * based, depending on the current state with respect to the threshold.
      *
      * @return The underlying output stream.
-     * @throws IOException if an error occurs.
+     *
+     * @exception IOException if an error occurs.
      */
     @Override
     protected OutputStream getStream() throws IOException {
@@ -145,7 +148,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * much data is being written to keep in memory, so we elect to switch to
      * disk-based storage.
      *
-     * @throws IOException if an error occurs.
+     * @exception IOException if an error occurs.
      */
     @Override
     protected void thresholdReached() throws IOException {
@@ -166,8 +169,8 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * Determines whether or not the data for this output stream has been
      * retained in memory.
      *
-     * @return {@code true} if the data is available in memory;
-     * {@code false} otherwise.
+     * @return <code>true</code> if the data is available in memory;
+     *         <code>false</code> otherwise.
      */
     public boolean isInMemory() {
         return !isThresholdExceeded();
@@ -177,9 +180,9 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
     /**
      * Returns the data for this output stream as an array of bytes, assuming
      * that the data has been retained in memory. If the data was written to
-     * disk, this method returns {@code null}.
+     * disk, this method returns <code>null</code>.
      *
-     * @return The data for this output stream, or {@code null} if no such
+     * @return The data for this output stream, or <code>null</code> if no such
      * data is available.
      */
     public byte[] getData() {
@@ -199,9 +202,9 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      *
      * If constructor specifying a temporary file prefix/suffix is used
      * then the temporary file created once the threshold is reached is returned
-     * If the threshold was not reached then {@code null} is returned.
+     * If the threshold was not reached then <code>null</code> is returned.
      *
-     * @return The file for this output stream, or {@code null} if no such
+     * @return The file for this output stream, or <code>null</code> if no such
      * file exists.
      */
     public File getFile() {
@@ -212,7 +215,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
     /**
      * Closes underlying output stream, and mark this as closed
      *
-     * @throws IOException if an error occurs.
+     * @exception IOException if an error occurs.
      */
     @Override
     public void close() throws IOException {
@@ -226,7 +229,7 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
      * after it has been closed.
      *
      * @param out output stream to write to.
-     * @throws IOException if this stream is not yet closed or an error occurs.
+     * @exception IOException if this stream is not yet closed or an error occurs.
      */
     public void writeTo(OutputStream out) throws IOException {
         // we may only need to check if this is closed if we are working with a file
@@ -238,9 +241,14 @@ public class EncryptedDeferredOutputStream extends ThresholdingOutputStream {
 
         if (isInMemory()) {
             memoryOutputStream.writeTo(out);
-        } else {
-            try (InputStream fis = new Crypto().encrypt(new FileInputStream(outputFile), key)) {
+        }
+        else
+        {
+            InputStream fis = new Crypto().encrypt(new FileInputStream(outputFile), key);
+            try {
                 IOUtils.copy(fis, out);
+            } finally {
+                IOUtils.closeQuietly(fis);
             }
         }
     }
