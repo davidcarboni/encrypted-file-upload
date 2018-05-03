@@ -2,6 +2,7 @@ package com.github.davidcarboni.encryptedfileupload;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FileCleaningTracker;
 
 import java.io.File;
