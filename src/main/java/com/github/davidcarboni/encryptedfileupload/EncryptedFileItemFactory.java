@@ -39,6 +39,12 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      */
     private FileCleaningTracker fileCleaningTracker;
 
+    /**
+     * Default content charset to be used when no explicit charset
+     * parameter is provided by the sender.
+     */
+    private String defaultCharset = DiskFileItem.DEFAULT_CHARSET;
+
     // ----------------------------------------------------------- Constructors
 
     /**
@@ -72,7 +78,7 @@ public class EncryptedFileItemFactory implements FileItemFactory {
      *
      * @return The directory in which temporary files will be located.
      *
-     * @see #setRepository(File)
+     * @see #setRepository(java.io.File)
      *
      */
     public File getRepository() {
@@ -119,7 +125,7 @@ public class EncryptedFileItemFactory implements FileItemFactory {
     // --------------------------------------------------------- Public Methods
 
     /**
-     * Create a new {@link EncryptedFileItem}
+     * Create a new {@link org.apache.commons.fileupload.disk.DiskFileItem}
      * instance from the supplied parameters and the local factory
      * configuration.
      *
@@ -136,6 +142,7 @@ public class EncryptedFileItemFactory implements FileItemFactory {
                                boolean isFormField, String fileName) {
         EncryptedFileItem result = new EncryptedFileItem(fieldName, contentType,
                 isFormField, fileName, sizeThreshold, repository);
+        result.setDefaultCharset(defaultCharset);
         FileCleaningTracker tracker = getFileCleaningTracker();
         if (tracker != null) {
             tracker.track(result.getTempFile(), result);
@@ -166,4 +173,21 @@ public class EncryptedFileItemFactory implements FileItemFactory {
         fileCleaningTracker = pTracker;
     }
 
+    /**
+     * Returns the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @return the default charset
+     */
+    public String getDefaultCharset() {
+        return defaultCharset;
+    }
+
+    /**
+     * Sets the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @param pCharset the default charset
+     */
+    public void setDefaultCharset(String pCharset) {
+        defaultCharset = pCharset;
+    }
 }

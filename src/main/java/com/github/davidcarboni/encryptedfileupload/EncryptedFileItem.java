@@ -22,14 +22,10 @@ import static java.lang.String.format;
  *
  * Based on {@code org.apache.commons.fileupload.disk.DiskFileItem} 1643123 2014-12-03 14:10:11Z tn $ - {@code commons-fileupload 1.4-SNAPSHOT}.
  */
-public class EncryptedFileItem implements FileItem {
+public class EncryptedFileItem
+        implements FileItem {
 
     // ----------------------------------------------------- Manifest constants
-
-    /**
-     * The UID to use when serializing this instance.
-     */
-    private static final long serialVersionUID = 2237570099615271025L;
 
     /**
      * Default content charset to be used when no explicit charset
@@ -106,11 +102,6 @@ public class EncryptedFileItem implements FileItem {
     private transient File tempFile;
 
     /**
-     * File to allow for serialization of the content of this item.
-     */
-    private File dfosFile;
-
-    /**
      * The file items headers.
      */
     private FileItemHeaders headers;
@@ -119,6 +110,12 @@ public class EncryptedFileItem implements FileItem {
      * Encryption key
      */
     private final SecretKey key;
+
+    /**
+     * Default content charset to be used when no explicit charset
+     * parameter is provided by the sender.
+     */
+    private String defaultCharset = DEFAULT_CHARSET;
 
     // ----------------------------------------------------------- Constructors
 
@@ -154,10 +151,10 @@ public class EncryptedFileItem implements FileItem {
     // ------------------------------- Methods from javax.activation.DataSource
 
     /**
-     * Returns an {@link InputStream InputStream} that can be
+     * Returns an {@link java.io.InputStream InputStream} that can be
      * used to retrieve the contents of the file.
      *
-     * @return An {@link InputStream InputStream} that can be
+     * @return An {@link java.io.InputStream InputStream} that can be
      * used to retrieve the contents of the file.
      *
      * @throws IOException if an error occurs.
@@ -242,7 +239,7 @@ public class EncryptedFileItem implements FileItem {
         } else if (dfos.isInMemory()) {
             return dfos.getData().length;
         } else {
-            // Use the count of bytes written, rather than the file size
+            // Use the count of bytes written, rather than the file size (as DiskFileItem does)
             // because encrypted file size will differ from cleartext size:
             return dfos.getByteCount();
         }
@@ -268,7 +265,7 @@ public class EncryptedFileItem implements FileItem {
         InputStream fis = null;
 
         try {
-            fis = new Crypto().decrypt(new BufferedInputStream( new FileInputStream(dfos.getFile())), key);
+            fis = new Crypto().decrypt(new FileInputStream(dfos.getFile()), key);
             IOUtils.readFully(fis, fileData);
         } catch (IOException e) {
             fileData = null;
@@ -309,7 +306,7 @@ public class EncryptedFileItem implements FileItem {
         byte[] rawdata = get();
         String charset = getCharSet();
         if (charset == null) {
-            charset = DEFAULT_CHARSET;
+            charset = defaultCharset;
         }
         try {
             return new String(rawdata, charset);
@@ -323,11 +320,11 @@ public class EncryptedFileItem implements FileItem {
      * is not concerned with whether or not the item is stored in memory, or on
      * disk in a temporary location. They just want to write the uploaded item
      * to a file.
-     *
+     * <p>
      * This implementation first attempts to rename the uploaded item to the
      * specified destination file, if the item was originally written to disk.
      * Otherwise, the data will be copied to the specified file.
-     *
+     * <p>
      * This method is only guaranteed to work <em>once</em>, the first time it
      * is invoked for a particular item. This is because, in the event that the
      * method renames a temporary file, that file will no longer be available
@@ -389,7 +386,7 @@ public class EncryptedFileItem implements FileItem {
     public void delete() {
         cachedContent = null;
         File outputFile = getStoreLocation();
-        if (outputFile != null && outputFile.exists()) {
+        if (outputFile != null && !isInMemory() && outputFile.exists()) {
             outputFile.delete();
         }
     }
@@ -400,7 +397,7 @@ public class EncryptedFileItem implements FileItem {
      *
      * @return The name of the form field.
      *
-     * @see #setFieldName(String)
+     * @see #setFieldName(java.lang.String)
      *
      */
     public String getFieldName() {
@@ -448,10 +445,10 @@ public class EncryptedFileItem implements FileItem {
     }
 
     /**
-     * Returns an {@link OutputStream OutputStream} that can
+     * Returns an {@link java.io.OutputStream OutputStream} that can
      * be used for storing the contents of the file.
      *
-     * @return An {@link OutputStream OutputStream} that can be used
+     * @return An {@link java.io.OutputStream OutputStream} that can be used
      *         for storing the contents of the file.
      *
      * @throws IOException if an error occurs.
@@ -468,11 +465,11 @@ public class EncryptedFileItem implements FileItem {
     // --------------------------------------------------------- Public methods
 
     /**
-     * Returns the {@link File} object for the <code>FileItem</code>'s
+     * Returns the {@link java.io.File} object for the <code>FileItem</code>'s
      * data's temporary location on the disk. Note that for
      * <code>FileItem</code>s that have their data stored in memory,
      * this method will return <code>null</code>. When handling large
-     * files, you can use {@link File#renameTo(File)} to
+     * files, you can use {@link java.io.File#renameTo(java.io.File)} to
      * move the file to new location without copying the data, if the
      * source and destination locations reside within the same logical
      * volume.
@@ -497,7 +494,7 @@ public class EncryptedFileItem implements FileItem {
      */
     @Override
     protected void finalize() {
-        if (dfos == null) {
+        if (dfos == null || dfos.isInMemory()) {
             return;
         }
         File outputFile = dfos.getFile();
@@ -508,15 +505,15 @@ public class EncryptedFileItem implements FileItem {
     }
 
     /**
-     * Creates and returns a {@link File File} representing a uniquely
+     * Creates and returns a {@link java.io.File File} representing a uniquely
      * named temporary file in the configured repository path. The lifetime of
      * the file is tied to the lifetime of the <code>FileItem</code> instance;
      * the file will be deleted when the instance is garbage collected.
-     *
+     * <p>
      * <b>Note: Subclasses that override this method must ensure that they return the
      * same File each time.</b>
      *
-     * @return The {@link File File} to be used for temporary storage.
+     * @return The {@link java.io.File File} to be used for temporary storage.
      */
     protected File getTempFile() {
         if (tempFile == null) {
@@ -565,77 +562,6 @@ public class EncryptedFileItem implements FileItem {
                 Boolean.valueOf(isFormField()), getFieldName());
     }
 
-    // -------------------------------------------------- Serialization methods
-
-    /**
-     * Writes the state of this object during serialization.
-     *
-     * @param out The stream to which the state should be written.
-     *
-     * @throws IOException if an error occurs.
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        // Read the data
-        if (dfos.isInMemory()) {
-            cachedContent = get();
-        } else {
-            cachedContent = null;
-            dfosFile = dfos.getFile();
-        }
-
-        // write out values
-        out.defaultWriteObject();
-    }
-
-    /**
-     * Reads the state of this object during deserialization.
-     *
-     * @param in The stream from which the state should be read.
-     *
-     * @throws IOException            if an error occurs.
-     * @throws ClassNotFoundException if class cannot be found.
-     */
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        // read values
-        in.defaultReadObject();
-
-        /* One expected use of serialization is to migrate HTTP sessions
-         * containing a EncryptedFileItem between JVMs. Particularly if the JVMs are
-         * on different machines It is possible that the repository location is
-         * not valid so validate it.
-         */
-        if (repository != null) {
-            if (repository.isDirectory()) {
-                // Check path for nulls
-                if (repository.getPath().contains("\0")) {
-                    throw new IOException(format(
-                            "The repository [%s] contains a null character",
-                            repository.getPath()));
-                }
-            } else {
-                throw new IOException(format(
-                        "The repository [%s] is not a directory",
-                        repository.getAbsolutePath()));
-            }
-        }
-
-        OutputStream output = getOutputStream();
-        if (cachedContent != null) {
-            output.write(cachedContent);
-        } else {
-            // Decrypt and re-encrypt the data into the new file
-            InputStream input = new Crypto().decrypt( new FileInputStream(dfosFile), key);
-            IOUtils.copy(input, output);
-            IOUtils.closeQuietly(input);
-            dfosFile.delete();
-            dfosFile = null;
-        }
-        output.close();
-
-        cachedContent = null;
-    }
-
     /**
      * Returns the file item headers.
      * @return The file items headers.
@@ -652,4 +578,21 @@ public class EncryptedFileItem implements FileItem {
         headers = pHeaders;
     }
 
+    /**
+     * Returns the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @return the default charset
+     */
+    public String getDefaultCharset() {
+        return defaultCharset;
+    }
+
+    /**
+     * Sets the default charset for use when no explicit charset
+     * parameter is provided by the sender.
+     * @param charset the default charset
+     */
+    public void setDefaultCharset(String charset) {
+        defaultCharset = charset;
+    }
 }
