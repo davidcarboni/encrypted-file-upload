@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItem;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
+import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.junit.Test;
 
 /**
@@ -35,6 +38,76 @@ import org.junit.Test;
  */
 @SuppressWarnings({"deprecation", "javadoc"}) // unit tests for deprecated class
 public class DefaultFileItemTest {
+
+    class DefaultFileItem extends EncryptedFileItem {
+
+        /**
+         * Constructs a new <code>EncryptedFileItem</code> instance.
+         *
+         * @param fieldName      The name of the form field.
+         * @param contentType    The content type passed by the browser or
+         *                       <code>null</code> if not specified.
+         * @param isFormField    Whether or not this item is a plain form field, as
+         *                       opposed to a file upload.
+         * @param fileName       The original filename in the user's filesystem, or
+         *                       <code>null</code> if not specified.
+         * @param sizeThreshold  The threshold, in bytes, below which items will be
+         *                       retained in memory and above which they will be
+         *                       stored as a file.
+         * @param repository     The data repository, which is the directory in
+         *                       which files will be created, should the item size
+         *                       exceed the threshold. If this is null, "java.io.tempdir"
+         *                       will be used as a default.
+         * @param defaultCharset The character encoding to use if no charset has been
+         *                       provided by the sender in the <code>contentType</code>
+         *                       parameter. This can be null and, if so, will fall back to
+         *                       {@value DEFAULT_CHARSET}.
+         */
+        public DefaultFileItem(String fieldName, String contentType, boolean isFormField, String fileName, int sizeThreshold, File repository, String defaultCharset) {
+            super(fieldName, contentType, isFormField, fileName, sizeThreshold, repository, defaultCharset);
+        }
+
+        /**
+         * This method is protected to avoid unintended usage,
+         * but to make it possible to access the temp file if necessary.
+         * @return {@link DeferredFileOutputStream#getFile()}
+         */
+        public File getStoreLocation() {
+            return super.getTempFile();
+        }
+    }
+
+    class DefaultFileItemFactory extends EncryptedFileItemFactory {
+
+
+        private int threshold;
+        private File repository;
+
+        public DefaultFileItemFactory(int threshold, File repository) {
+            this.threshold = threshold;
+            this.repository = repository;
+        }
+
+        /**
+         * Create a new {@link EncryptedFileItem}
+         * instance from the supplied parameters and the local factory
+         * configuration.
+         *
+         * @param fieldName   The name of the form field.
+         * @param contentType The content type of the form field.
+         * @param isFormField <code>true</code> if this is a plain form field;
+         *                    <code>false</code> otherwise.
+         * @param fileName    The name of the uploaded file, if any, as supplied
+         *                    by the browser or other client.
+         *
+         * @return The newly created file item.
+         */
+        public FileItem createItem(String fieldName, String contentType,
+                                   boolean isFormField, String fileName) {
+            return new DefaultFileItem(fieldName, contentType,
+                    isFormField, fileName, threshold, repository, null);
+        }
+    }
 
     /**
      * Content type for regular form items.
@@ -188,7 +261,7 @@ public class DefaultFileItemTest {
         File storeLocation = dfi.getStoreLocation();
         assertNotNull(storeLocation);
         assertTrue(storeLocation.exists());
-        assertEquals(storeLocation.length(), testFieldValueBytes.length);
+        assertEquals(storeLocation.length() - EncryptedFileItem.IV_SIZE, testFieldValueBytes.length);
 
         if (repository != null) {
             assertEquals(storeLocation.getParentFile(), repository);
