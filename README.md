@@ -1,14 +1,14 @@
 # Encrypted HTTP Multipart Upload
 
 Implementations of [Commons Fileupload](https://github.com/apache/commons-fileupload) 
-['FileItemFactory'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItemFactory.java)
-and ['FileItem'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItem.java) 
-that provide transparent encryption of file uploads for the lifetime of a 'FileItem'.
+[`FileItemFactory`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItemFactory.java)
+and [`FileItem`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItem.java) 
+that provide transparent encryption of file uploads for the lifetime of a `FileItem`.
 
 This implementation is designed to be transparent to the caller. 
 Keys are ephemeral and are generated on the fly, so encryption "just works" without you needing to do anything.
 
-When the 'FileItem' is garbage collected, the key is lost and any temp data becomes unrecoverable 
+When the `FileItem` is garbage collected, the key is lost and any temp data becomes unrecoverable 
 (*that's a good thing*). 
 
 The purpose of this implementation is to make it trivial to ensure uploaded data are not written to disk in the clear.
@@ -20,11 +20,11 @@ https://issues.apache.org/jira/browse/FILEUPLOAD-119
 ## Basics
 
 These classes are designed as drop-in replacements for 
-['DiskFileItemFactory'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItemFactory.java) 
-and ['DiskFileItem'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java).
+[`DiskFileItemFactory`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItemFactory.java) 
+and [`DiskFileItem`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java).
 
 Encryption is transparent and you should need to make no change to your code, providing you stick to the 
-['FileItem'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItem.java) interface.
+[`FileItem`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/FileItem.java) interface.
 
 Dependency:
 
@@ -51,17 +51,17 @@ List<FileItem> items = upload.parseRequest(request);
 
 For more on FileUpload usage, see: https://commons.apache.org/proper/commons-fileupload/using.html
 
-NB there's less of a need to call `factory.setRepository(...)`
+NB there`s less of a need to call `factory.setRepository(...)`
 because content written to disk is encrypted.
 
-If you rely on the additional method 'getStoreLocation()' provided by the
-['DiskFileItem'](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java) 
-implementation, you'll need to alter your code to use 'getInputStream()' instead. 
+If you rely on the additional method `getStoreLocation()` provided by the
+[`DiskFileItem`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java) 
+implementation, you'll need to alter your code to use `getInputStream()` instead. 
 
 The reason for this is that the raw temp file is encrypted: *the centent is meaningless*.
 Directly accessing this file (for example to move it rather than copy it)
 would lead to unexpected results (ie a scrambled file). 
-The 'getStoreLocation()' method is not provided to help you avoid this happening unintentionally. 
+The `getStoreLocation()` method is not provided to help you avoid this happening unintentionally. 
 
 
 ## Testing
