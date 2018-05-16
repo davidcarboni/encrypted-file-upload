@@ -22,7 +22,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -54,9 +54,9 @@ public class Util {
      * Return a list of {@link FileUpload} implementations for parameterized tests.
      * @return a list of {@link FileUpload} implementations
      */
-    public static List<FileUpload> fileUploadImplementations() {
+    public static List<FileUpload[]> fileUploadImplementations() {
         return Arrays.asList(
-                new ServletFileUpload(new DiskFileItemFactory()),
-                new PortletFileUpload(new DiskFileItemFactory()));
+                new FileUpload[]{new ServletFileUpload(new EncryptedFileItemFactory())},
+                new FileUpload[]{new PortletFileUpload(new EncryptedFileItemFactory())});
     }
 }

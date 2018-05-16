@@ -32,9 +32,6 @@ import org.junit.Test;
 
 /**
  * Test for {@link ServletFileUpload}.
- *
- * @see FileUploadTest
- * @since 1.4
  */
 public class ServletFileUploadTest {
 
@@ -45,24 +42,24 @@ public class ServletFileUploadTest {
     public void parseParameterMap()
             throws Exception {
         String text = "-----1234\r\n" +
-                      "Content-Disposition: form-data; name=\"file\"; filename=\"foo.tab\"\r\n" +
-                      "Content-Type: text/whatever\r\n" +
-                      "\r\n" +
-                      "This is the content of the file\n" +
-                      "\r\n" +
-                      "-----1234\r\n" +
-                      "Content-Disposition: form-data; name=\"field\"\r\n" +
-                      "\r\n" +
-                      "fieldValue\r\n" +
-                      "-----1234\r\n" +
-                      "Content-Disposition: form-data; name=\"multi\"\r\n" +
-                      "\r\n" +
-                      "value1\r\n" +
-                      "-----1234\r\n" +
-                      "Content-Disposition: form-data; name=\"multi\"\r\n" +
-                      "\r\n" +
-                      "value2\r\n" +
-                      "-----1234--\r\n";
+                "Content-Disposition: form-data; name=\"file\"; filename=\"foo.tab\"\r\n" +
+                "Content-Type: text/whatever\r\n" +
+                "\r\n" +
+                "This is the content of the file\n" +
+                "\r\n" +
+                "-----1234\r\n" +
+                "Content-Disposition: form-data; name=\"field\"\r\n" +
+                "\r\n" +
+                "fieldValue\r\n" +
+                "-----1234\r\n" +
+                "Content-Disposition: form-data; name=\"multi\"\r\n" +
+                "\r\n" +
+                "value1\r\n" +
+                "-----1234\r\n" +
+                "Content-Disposition: form-data; name=\"multi\"\r\n" +
+                "\r\n" +
+                "value2\r\n" +
+                "-----1234--\r\n";
         byte[] bytes = text.getBytes("US-ASCII");
         HttpServletRequest request = new MockHttpServletRequest(bytes, Constants.CONTENT_TYPE);
 
@@ -81,12 +78,12 @@ public class ServletFileUploadTest {
 
     @Test
     public void parseImpliedUtf8()
-	    throws Exception {
+            throws Exception {
         // utf8 encoded form-data without explicit content-type encoding
         String text = "-----1234\r\n" +
                 "Content-Disposition: form-data; name=\"utf8Html\"\r\n" +
                 "\r\n" +
-                "Th�s �s the co�te�t of the f�le\n" +
+                "Thís ís the coñteñt of the fíle\n" +
                 "\r\n" +
                 "-----1234--\r\n";
 
@@ -98,6 +95,6 @@ public class ServletFileUploadTest {
         ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
         List<FileItem> fileItems = upload.parseRequest(request);
         FileItem fileItem = fileItems.get(0);
-        assertTrue(fileItem.getString(), fileItem.getString().contains("co�te�t"));
+        assertTrue(fileItem.getString(), fileItem.getString().contains("coñteñt"));
     }
 }
