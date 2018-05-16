@@ -95,9 +95,10 @@ public class EncryptedFileItem implements FileItem {
      * Initialisation Vector size
      */
     private static final int initialisationVectorSize = new Crypto().getIvSize();
+    private String charset;
 
     /**
-     * Constructs a new <code>DiskFileItem</code> instance.
+     * Constructs a new <code>EncryptedFileItem</code> instance.
      *
      * @param fieldName     The name of the form field.
      * @param contentType   The content type passed by the browser or
@@ -134,7 +135,7 @@ public class EncryptedFileItem implements FileItem {
         // Set the size threshold based on plaintext data.
         // That means adding space for the encryption initialisation vector:
         int threshold = sizeThreshold + initialisationVectorSize;
-        DeferredFileOutputStream dfos = new DeferredFileOutputStream(threshold, prefix, suffix, tempDir);
+        dfos = new DeferredFileOutputStream(threshold, prefix, suffix, tempDir);
     }
 
     // ------------------------------- Methods from javax.activation.DataSource
@@ -179,11 +180,22 @@ public class EncryptedFileItem implements FileItem {
      *         not defined.
      */
     public String getCharSet() {
+        if (charset != null) {
+            return charset;
+        }
         ParameterParser parser = new ParameterParser();
         parser.setLowerCaseNames(true);
         // Parameter parser can handle null input
         Map<String, String> params = parser.parse(getContentType(), ';');
         return params.get("charset");
+    }
+
+    /**
+     * Explicitly set the charset.
+     * @param charset
+     */
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 
     /**
@@ -467,5 +479,14 @@ public class EncryptedFileItem implements FileItem {
         return String.format("name=%s, StoreLocation=%s, size=%s bytes, isFormField=%s, FieldName=%s",
                 getName(), dfos.getFile(), Long.valueOf(getSize()),
                 Boolean.valueOf(isFormField()), getFieldName());
+    }
+
+    /**
+     * This method is protected to avoid unintended usage,
+     * but to make it possible to access the temp file if necessary.
+     * @return {@link DeferredFileOutputStream#getFile()}
+     */
+    protected File getTempFile() {
+        return dfos.getFile();
     }
 }
