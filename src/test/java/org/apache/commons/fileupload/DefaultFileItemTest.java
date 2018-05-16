@@ -28,11 +28,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.apache.commons.fileupload.disk.Cryptography;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItem;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link org.apache.commons.fileupload.DefaultFileItem}.
+ * Unit tests for {@link com.github.davidcarboni.fileupload.encrypted.EncryptedFileItem}.
  */
 @SuppressWarnings({"deprecation", "javadoc"}) // unit tests for deprecated class
 public class DefaultFileItemTest {
@@ -184,17 +185,10 @@ public class DefaultFileItemTest {
         assertTrue(Arrays.equals(item.get(), testFieldValueBytes));
         assertEquals(item.getString(), textFieldValue);
 
-        assertTrue(item instanceof DefaultFileItem);
-        DefaultFileItem dfi = (DefaultFileItem) item;
-        File storeLocation = dfi.getStoreLocation();
-        assertNotNull(storeLocation);
-        assertTrue(storeLocation.exists());
-        long decryptedLength = storeLocation.length() - Cryptography.IninialisationVectorSize();
-        assertEquals(decryptedLength, testFieldValueBytes.length);
-
-        if (repository != null) {
-            assertEquals(storeLocation.getParentFile(), repository);
-        }
+        assertTrue(item instanceof EncryptedFileItem);
+        EncryptedFileItem dfi = (EncryptedFileItem) item;
+        assertFalse(dfi.isInMemory());
+        assertEquals(dfi.getSize(), testFieldValueBytes.length);
 
         item.delete();
     }
@@ -209,7 +203,7 @@ public class DefaultFileItemTest {
      * @return the new <code>FileItemFactory</code> instance.
      */
     protected FileItemFactory createFactory(File repository) {
-        return new DefaultFileItemFactory(threshold, repository);
+        return new EncryptedFileItemFactory(threshold);
     }
 
     static final String CHARSET_ISO88591 = "ISO-8859-1";
