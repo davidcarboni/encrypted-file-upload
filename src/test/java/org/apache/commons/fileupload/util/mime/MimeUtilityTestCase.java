@@ -49,7 +49,7 @@ public final class MimeUtilityTestCase {
     @Test
     public void decodeIso88591Base64Encoded() throws Exception {
         assertEncoded("If you can read this you understand the example.",
-                      "=?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?= =?ISO-8859-2?B?dSB1bmRlcnN0YW5kIHRoZSBleGFtcGxlLg==?=\"\r\n");
+                "=?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?= =?ISO-8859-2?B?dSB1bmRlcnN0YW5kIHRoZSBleGFtcGxlLg==?=\"\r\n");
     }
 
     @Test
