@@ -32,7 +32,7 @@ Dependency:
 <dependency>
   <groupId>com.github.davidcarboni</groupId>
   <artifactId>encrypted-file-upload</artifactId>
-  <version>1.0.2</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 
@@ -62,6 +62,17 @@ The reason for this is that the raw temp file is encrypted: *the centent is mean
 Directly accessing this file (for example to move it rather than copy it)
 would lead to unexpected results (ie a scrambled file). 
 The 'getStoreLocation()' method is not provided to help you avoid this happening unintentionally. 
+
+
+## Testing
+
+A note on how these classes have been tested.
+The Commons FileUpload test suite has been copied
+into this project in its entirety. 
+It's then been tweaked just enough to point the tests
+at `EncryptedFileItem` and `EncryptedFileItemFactory`.
+This ensures that these implementations pass the same 
+standard of tests as the implementations in FileUpload.
 
 
 ## Encryption
