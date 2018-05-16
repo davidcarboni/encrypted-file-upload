@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import org.apache.commons.fileupload.portlet.PortletFileUploadTest;
 import org.apache.commons.fileupload.servlet.ServletFileUploadTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +38,6 @@ import org.junit.runners.Parameterized.Parameters;
  * in this class.
  *
  * @see ServletFileUploadTest
- * @see PortletFileUploadTest
  * @since 1.4
  */
 @RunWith(Parameterized.class)
