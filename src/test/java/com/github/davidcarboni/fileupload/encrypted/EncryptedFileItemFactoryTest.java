@@ -1,4 +1,4 @@
-package com.github.davidcarboni.encryptedfileupload;
+package com.github.davidcarboni.fileupload.encrypted;
 
 import com.github.davidcarboni.cryptolite.Random;
 import org.apache.commons.fileupload.FileItem;
