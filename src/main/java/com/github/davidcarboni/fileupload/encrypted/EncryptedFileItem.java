@@ -100,6 +100,13 @@ public class EncryptedFileItem implements FileItem {
      */
     private final SecretKey key;
 
+    static {
+        // Upgrade encryption to AES-256 if this JVM supports it:
+        if (Keys.canUseStrongKeys()) {
+            Keys.setSymmetricKeySize(Keys.SYMMETRIC_KEY_SIZE_UNLIMITED);
+        }
+    }
+
 
     /**
      * Constructs a new <code>EncryptedFileItem</code> instance.

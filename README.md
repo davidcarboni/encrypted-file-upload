@@ -58,9 +58,9 @@ If you rely on the additional method `getStoreLocation()` provided by the
 [`DiskFileItem`](https://github.com/apache/commons-fileupload/blob/master/src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java) 
 implementation, you'll need to alter your code to use `getInputStream()` instead. 
 
-The reason for this is that the raw temp file is encrypted: *the centent is meaningless*.
+The reason for this is that the raw temp file is encrypted: *the content is meaningless*.
 Directly accessing this file (for example to move it rather than copy it)
-would lead to unexpected results (ie a scrambled file). 
+would lead to unexpected results (i.e. a scrambled file). 
 The `getStoreLocation()` method is not provided to help you avoid this happening unintentionally. 
 
 
@@ -79,8 +79,10 @@ standard of tests as the implementations in FileUpload.
 
 Encryption is provided by your standard JCE providers, via the [Cryptolite](https://github.com/davidcarboni/Cryptolite) library.
 
-Data are encrypted using AES-128 in Counter (CTR) mode.
+Data are encrypted using AES-128 in Counter (CTR) mode by default.
 This should ensure compatibility with the majority of JVMs.
+If your JVM is configured for unlimited strength cryptography
+then larger encryption keys (AES-256) will be generated automatically.
 
 If you would like to look in detail at the encryption code, feel free to inspect, copy or replace the JCE code from Cryptolite.
 
