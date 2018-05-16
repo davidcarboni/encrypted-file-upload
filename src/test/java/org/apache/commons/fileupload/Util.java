@@ -54,9 +54,9 @@ public class Util {
      * Return a list of {@link FileUpload} implementations for parameterized tests.
      * @return a list of {@link FileUpload} implementations
      */
-    public static List<FileUpload[]> fileUploadImplementations() {
+    public static List<FileUpload> fileUploadImplementations() {
         return Arrays.asList(
-                new FileUpload[]{new ServletFileUpload(new EncryptedFileItemFactory())},
-                new FileUpload[]{new PortletFileUpload(new EncryptedFileItemFactory())});
+                new ServletFileUpload(new EncryptedFileItemFactory()),
+                new PortletFileUpload(new EncryptedFileItemFactory()));
     }
 }
