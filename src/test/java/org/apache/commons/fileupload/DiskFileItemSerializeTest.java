@@ -30,7 +30,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +38,7 @@ import org.junit.Test;
 
 /**
  * Serialization Unit tests for
- *  {@link org.apache.commons.fileupload.disk.DiskFileItem}.
+ *  {@link com.github.davidcarboni.fileupload.encrypted.EncryptedFileItem}.
  */
 public class DiskFileItemSerializeTest {
 
@@ -199,7 +199,7 @@ public class DiskFileItemSerializeTest {
      * Create a FileItem with the specfied content bytes and repository.
      */
     private FileItem createFileItem(byte[] contentBytes, File repository) {
-        FileItemFactory factory = new DiskFileItemFactory(threshold, repository);
+        FileItemFactory factory = new EncryptedFileItemFactory(threshold);
         String textFieldName = "textField";
 
         FileItem item = factory.createItem(
