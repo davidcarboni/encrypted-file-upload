@@ -43,7 +43,7 @@ import org.junit.Test;
 public class DiskFileItemSerializeTest {
 
     // Use a private repo to catch any files left over by tests
-    private static final File REPO = new File(System.getProperty("java.io.tmpdir"), "diskfileitemrepo");
+    private static final File REPO = new File(System.getProperty("java.io.tmpdir"), "encryptedfileitemrepo");
 
     @Before
     public void setUp() throws Exception {
