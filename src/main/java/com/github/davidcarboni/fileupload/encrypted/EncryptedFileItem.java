@@ -1,5 +1,7 @@
 package com.github.davidcarboni.fileupload.encrypted;
 
+import static java.lang.String.format;
+
 import com.github.davidcarboni.cryptolite.Crypto;
 import com.github.davidcarboni.cryptolite.Keys;
 import com.github.davidcarboni.cryptolite.Random;
@@ -11,6 +13,7 @@ import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
+import org.apache.commons.lang.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.io.*;
@@ -29,20 +32,11 @@ import java.util.Map;
  * it into memory, which may come handy with large files.
  *
  * <p>Temporary files, which are created for file items, should be
- * deleted later on. The best way to do this is using a
- * {@link org.apache.commons.io.FileCleaningTracker}, which you can set on the
- * {@link EncryptedFileItemFactory}. However, if you do use such a tracker,
- * then you must consider the following: Temporary files are automatically
- * deleted as soon as they are no longer needed. (More precisely, when the
- * corresponding instance of {@link java.io.File} is garbage collected.)
- * This is done by the so-called reaper thread, which is started and stopped
- * automatically by the {@link org.apache.commons.io.FileCleaningTracker} when
- * there are files to be tracked.
- * It might make sense to terminate that thread, for example, if
- * your web application ends. See the section on "Resource cleanup"
- * in the users guide of commons-fileupload.</p>
+ * deleted later on. This implementation handles deletion using the
+ * {@link Object#finalize()} method, which calls {@link #delete()}.
  *
- * @since FileUpload 1.1
+ * This class is based on a simplified version of
+ * {@link org.apache.commons.fileupload.disk.DiskFileItem DiskFileItem}.
  */
 public class EncryptedFileItem implements FileItem {
 
@@ -53,6 +47,11 @@ public class EncryptedFileItem implements FileItem {
      * "ISO-8859-1" when received via HTTP.
      */
     public static final String DEFAULT_CHARSET = "ISO-8859-1";
+
+    /**
+     * Initialisation Vector size
+     */
+    public static final int IV_SIZE = new Crypto().getIvSize();
 
 
     /**
@@ -82,20 +81,25 @@ public class EncryptedFileItem implements FileItem {
     private DeferredFileOutputStream dfos;
 
     /**
+     * Output stream for this item, wrapped with an encrypting stream.
+     */
+    private OutputStream cipherOutputStream;
+
+    /**
      * The file items headers.
      */
     private FileItemHeaders headers;
 
     /**
-     * Encryption key
+     * The encoding to use for this FileItem.
+     */
+    private String charset;
+
+    /**
+     * Encryption key.
      */
     private final SecretKey key;
 
-    /**
-     * Initialisation Vector size
-     */
-    private static final int initialisationVectorSize = new Crypto().getIvSize();
-    private String charset;
 
     /**
      * Constructs a new <code>EncryptedFileItem</code> instance.
@@ -110,31 +114,51 @@ public class EncryptedFileItem implements FileItem {
      * @param sizeThreshold The threshold, in bytes, below which items will be
      *                      retained in memory and above which they will be
      *                      stored as a file.
+     * @param repository    The data repository, which is the directory in
+     *                      which files will be created, should the item size
+     *                      exceed the threshold. If this is null, "java.io.tempdir"
+     *                      will be used as a default.
+     * @param defaultCharset The character encoding to use if no charset has been
+     *                       provided by the sender in the <code>contentType</code>
+     *                       parameter. This can be null and, if so, will fall back to
+     *                       {@value DEFAULT_CHARSET}.
      */
     public EncryptedFileItem(String fieldName,
                              String contentType, boolean isFormField, String fileName,
-                             int sizeThreshold) {
+            int sizeThreshold, File repository, String defaultCharset) {
         this.fieldName = fieldName;
         this.contentType = contentType;
         this.isFormField = isFormField;
         this.fileName = fileName;
 
+        // Character encoding
+        ParameterParser parser = new ParameterParser();
+        parser.setLowerCaseNames(true);
+        // Parameter parser can handle null input
+        Map<String, String> params = parser.parse(getContentType(), ';');
+        String charset = params.get("charset");
+        String fallback = StringUtils.defaultIfEmpty(defaultCharset, DEFAULT_CHARSET);
+        this.charset = StringUtils.defaultIfEmpty(charset, fallback);
+
         // Encryption key
         key = Keys.newSecretKey();
 
-        // Get the system temp directory
-        // NB anything written to disk will be encrypted
-        //     so we can use standard temp files.
-        String tempPath = System.getProperty("java.io.tmpdir");
-        File tempDir = new File(tempPath);
+        // Temp directory
+        File tempDir = repository;
+        if (tempDir == null) {
+            // Get the system temp directory
+            // NB anything written to disk will be encrypted
+            //     so it's low rist to use standard temp files.
+            tempDir = new File(System.getProperty("java.io.tmpdir"));
+        }
 
-        // Generate random prefix/suffix for the potential temp file
+        // Generate random prefix/suffix for a (potential) temp file
         String prefix = Random.password(4);
         String suffix = Random.password(4);
 
         // Set the size threshold based on plaintext data.
         // That means adding space for the encryption initialisation vector:
-        int threshold = sizeThreshold + initialisationVectorSize;
+        int threshold = sizeThreshold + IV_SIZE;
         dfos = new DeferredFileOutputStream(threshold, prefix, suffix, tempDir);
     }
 
@@ -149,7 +173,6 @@ public class EncryptedFileItem implements FileItem {
      *
      * @throws IOException if an error occurs.
      */
-    @Override
     public InputStream getInputStream() throws IOException {
         InputStream input;
         if (dfos.isInMemory()) {
@@ -167,35 +190,8 @@ public class EncryptedFileItem implements FileItem {
      * @return The content type passed by the agent or <code>null</code> if
      *         not defined.
      */
-    @Override
     public String getContentType() {
         return contentType;
-    }
-
-    /**
-     * Returns the content charset passed by the agent or <code>null</code> if
-     * not defined.
-     *
-     * @return The content charset passed by the agent or <code>null</code> if
-     *         not defined.
-     */
-    public String getCharSet() {
-        if (charset != null) {
-            return charset;
-        }
-        ParameterParser parser = new ParameterParser();
-        parser.setLowerCaseNames(true);
-        // Parameter parser can handle null input
-        Map<String, String> params = parser.parse(getContentType(), ';');
-        return params.get("charset");
-    }
-
-    /**
-     * Explicitly set the charset.
-     * @param charset
-     */
-    public void setCharset(String charset) {
-        this.charset = charset;
     }
 
     /**
@@ -207,7 +203,6 @@ public class EncryptedFileItem implements FileItem {
      *   use the file name anyways, catch the exception and use
      *   {@link org.apache.commons.fileupload.InvalidFileNameException#getName()}.
      */
-    @Override
     public String getName() {
         return Streams.checkFileName(fileName);
     }
@@ -221,7 +216,6 @@ public class EncryptedFileItem implements FileItem {
      * @return <code>true</code> if the file contents will be read
      *         from memory; <code>false</code> otherwise.
      */
-    @Override
     public boolean isInMemory() {
         return dfos.isInMemory();
     }
@@ -231,15 +225,16 @@ public class EncryptedFileItem implements FileItem {
      *
      * @return The size of the file, in bytes.
      */
-    @Override
     public long getSize() {
-        int length;
+        int size;
         if (dfos.isInMemory()) {
-            length = dfos.getData().length;
+            size = dfos.getData().length;
         } else {
-            length = (int) dfos.getFile().length();
+            size = (int) dfos.getFile().length();
         }
-        return length - initialisationVectorSize;
+        // The initialization vector in prepended to the content,
+        // so the content size is less than the byte length.
+        return size - IV_SIZE;
     }
 
     /**
@@ -250,11 +245,11 @@ public class EncryptedFileItem implements FileItem {
      * @return The contents of the file as an array of bytes
      * or {@code null} if the data cannot be read
      */
-    @Override
     public byte[] get() {
 
         InputStream input;
 
+        // Input
         if (dfos.isInMemory()) {
             input = new ByteArrayInputStream(dfos.getData());
         } else {
@@ -265,8 +260,8 @@ public class EncryptedFileItem implements FileItem {
             }
         }
 
+        // Copy
         byte[] fileData = new byte[(int) getSize()];
-
         try {
             input = new Crypto().decrypt(input, key);
             IOUtils.readFully(input, fileData);
@@ -284,16 +279,16 @@ public class EncryptedFileItem implements FileItem {
      * encoding.  This method uses {@link #get()} to retrieve the
      * contents of the file.
      *
-     * @param encoding The encoding to use.
+     * @param charset The charset to use.
      *
      * @return The contents of the file, as a string.
      *
      * @throws UnsupportedEncodingException if the requested character
      *                                      encoding is not available.
      */
-    @Override
-    public String getString(String encoding) throws UnsupportedEncodingException {
-        return new String(get(), encoding);
+    public String getString(final String charset)
+        throws UnsupportedEncodingException {
+        return new String(get(), charset);
     }
 
     /**
@@ -301,17 +296,11 @@ public class EncryptedFileItem implements FileItem {
      * character encoding.  This method uses {@link #get()} to retrieve the
      * contents of the file.
      *
-     * <b>TODO</b> Consider making this method throw UnsupportedEncodingException.
-     *
-     * @return The contents of the file, as a string.
+     * @return The contents of the file, as a string, using {@link #charset}
+     * if possible.
      */
-    @Override
     public String getString() {
         byte[] rawdata = get();
-        String charset = getCharSet();
-        if (charset == null) {
-            charset = DEFAULT_CHARSET;
-        }
         try {
             return new String(rawdata, charset);
         } catch (UnsupportedEncodingException e) {
@@ -325,34 +314,37 @@ public class EncryptedFileItem implements FileItem {
      * disk in a temporary location. They just want to write the uploaded item
      * to a file.
      * <p>
-     * This implementation first attempts to rename the uploaded item to the
-     * specified destination file, if the item was originally written to disk.
-     * Otherwise, the data will be copied to the specified file.
+     * This implementation will always copy the data to the specified file, unlike
+     * {@link org.apache.commons.fileupload.disk.DiskFileItem DiskFileItem},
+     * which may attempt to move the file. This is because the content is
+     * encrypted. It therefore must be read through a decrypting stream
+     * in order to access the decrypted data.
      * <p>
-     * This method is only guaranteed to work <em>once</em>, the first time it
-     * is invoked for a particular item. This is because, in the event that the
-     * method renames a temporary file, that file will no longer be available
-     * to copy or rename again at a later time.
+     * In contrast to
+     * {@link org.apache.commons.fileupload.disk.DiskFileItem DiskFileItem},
+     * this method can be called multiple times because any temporary file
+     * will not be moved.
      *
      * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
      *
      * @throws Exception if an error occurs.
      */
-    @Override
     public void write(File file) throws Exception {
 
         try {
 
+            // Input
             InputStream input;
             if (dfos.isInMemory()) {
                 input = new ByteArrayInputStream(dfos.getData());
             } else {
                 input = new FileInputStream(dfos.getFile());
             }
+            input = new Crypto().decrypt(input, key);
 
+            // Copy
             try (FileOutputStream output = new FileOutputStream(file)) {
-                input = new Crypto().decrypt(input, key);
                 IOUtils.copy(input, output);
             } finally {
                 IOUtils.closeQuietly(input);
@@ -372,10 +364,9 @@ public class EncryptedFileItem implements FileItem {
      * Deletes the underlying storage for a file item, including deleting any
      * associated temporary disk file. Although this storage will be deleted
      * automatically when the <code>FileItem</code> instance is garbage
-     * collected, this method can be used to ensure that this is done at an
-     * earlier time, thus preserving system resources.
+     * collected, this method can be used to ensure that this is done
+     * explicitly.
      */
-    @Override
     public void delete() {
         FileUtils.deleteQuietly(dfos.getFile());
     }
@@ -389,7 +380,6 @@ public class EncryptedFileItem implements FileItem {
      * @see #setFieldName(java.lang.String)
      *
      */
-    @Override
     public String getFieldName() {
         return fieldName;
     }
@@ -397,14 +387,13 @@ public class EncryptedFileItem implements FileItem {
     /**
      * Sets the field name used to reference this file item.
      *
-     * @param name The name of the form field.
+     * @param fieldName The name of the form field.
      *
      * @see #getFieldName()
      *
      */
-    @Override
-    public void setFieldName(String name) {
-        this.fieldName = name;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     /**
@@ -417,7 +406,6 @@ public class EncryptedFileItem implements FileItem {
      * @see #setFormField(boolean)
      *
      */
-    @Override
     public boolean isFormField() {
         return isFormField;
     }
@@ -432,7 +420,6 @@ public class EncryptedFileItem implements FileItem {
      * @see #isFormField()
      *
      */
-    @Override
     public void setFormField(boolean state) {
         isFormField = state;
     }
@@ -446,19 +433,11 @@ public class EncryptedFileItem implements FileItem {
      *
      * @throws IOException if an error occurs.
      */
-    @Override
     public OutputStream getOutputStream() throws IOException {
-        return new Crypto().encrypt(dfos, key);
-    }
-
-    @Override
-    public FileItemHeaders getHeaders() {
-        return headers;
-    }
-
-    @Override
-    public void setHeaders(FileItemHeaders headers) {
-        this.headers = headers;
+        if (cipherOutputStream == null) {
+            cipherOutputStream = new Crypto().encrypt(dfos, key);
+        }
+        return cipherOutputStream;
     }
 
     /**
@@ -476,9 +455,25 @@ public class EncryptedFileItem implements FileItem {
      */
     @Override
     public String toString() {
-        return String.format("name=%s, StoreLocation=%s, size=%s bytes, isFormField=%s, FieldName=%s",
+        return format("name=%s, StoreLocation=%s, size=%s bytes, isFormField=%s, FieldName=%s",
                 getName(), dfos.getFile(), Long.valueOf(getSize()),
                 Boolean.valueOf(isFormField()), getFieldName());
+    }
+
+    /**
+     * Returns the file item headers.
+     * @return The file items headers.
+     */
+    public FileItemHeaders getHeaders() {
+        return headers;
+    }
+
+    /**
+     * Sets the file item headers.
+     * @param headers The file items headers.
+     */
+    public void setHeaders(FileItemHeaders headers) {
+        this.headers = headers;
     }
 
     /**
