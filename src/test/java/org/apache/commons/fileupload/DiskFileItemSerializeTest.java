@@ -199,7 +199,7 @@ public class DiskFileItemSerializeTest {
      * Create a FileItem with the specfied content bytes and repository.
      */
     private FileItem createFileItem(byte[] contentBytes, File repository) {
-        FileItemFactory factory = new EncryptedFileItemFactory(threshold);
+        FileItemFactory factory = new EncryptedFileItemFactory(threshold, repository);
         String textFieldName = "textField";
 
         FileItem item = factory.createItem(
