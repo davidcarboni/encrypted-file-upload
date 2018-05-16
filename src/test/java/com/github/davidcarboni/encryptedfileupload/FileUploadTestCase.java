@@ -16,6 +16,7 @@
  */
 package com.github.davidcarboni.encryptedfileupload;
 
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
