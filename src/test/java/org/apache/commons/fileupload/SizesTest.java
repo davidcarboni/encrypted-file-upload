@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileUploadBase.FileUploadIOException;
 import org.apache.commons.fileupload.FileUploadBase.SizeException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import com.github.davidcarboni.fileupload.encrypted.EncryptedFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public class SizesTest {
         baos.write("-----1234--\r\n".getBytes("US-ASCII"));
 
         List<FileItem> fileItems =
-                Util.parseUpload(new ServletFileUpload(new DiskFileItemFactory()), baos.toByteArray());
+                Util.parseUpload(new ServletFileUpload(new EncryptedFileItemFactory()), baos.toByteArray());
         Iterator<FileItem> fileIter = fileItems.iterator();
         add = 16;
         num = 0;
@@ -99,7 +99,7 @@ public class SizesTest {
             "\r\n" +
             "-----1234--\r\n";
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(-1);
         HttpServletRequest req = new MockHttpServletRequest(
                 request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
@@ -108,7 +108,7 @@ public class SizesTest {
         FileItem item = fileItems.get(0);
         assertEquals("This is the content of the file\n", new String(item.get()));
 
-        upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(40);
         req = new MockHttpServletRequest(request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
         fileItems = upload.parseRequest(req);
@@ -116,7 +116,7 @@ public class SizesTest {
         item = fileItems.get(0);
         assertEquals("This is the content of the file\n", new String(item.get()));
 
-        upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(30);
         req = new MockHttpServletRequest(request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
         try {
@@ -142,7 +142,7 @@ public class SizesTest {
             "\r\n" +
             "-----1234--\r\n";
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(-1);
         HttpServletRequest req = new MockHttpServletRequest(
                 request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
@@ -151,7 +151,7 @@ public class SizesTest {
         FileItem item = fileItems.get(0);
         assertEquals("This is the content of the file\n", new String(item.get()));
 
-        upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(40);
         req = new MockHttpServletRequest(request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
         fileItems = upload.parseRequest(req);
@@ -160,7 +160,7 @@ public class SizesTest {
         assertEquals("This is the content of the file\n", new String(item.get()));
 
         // provided Content-Length is larger than the FileSizeMax -> handled by ctor
-        upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(5);
         req = new MockHttpServletRequest(request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
         try {
@@ -171,7 +171,7 @@ public class SizesTest {
         }
 
         // provided Content-Length is wrong, actual content is larger -> handled by LimitedInputStream
-        upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(15);
         req = new MockHttpServletRequest(request.getBytes("US-ASCII"), Constants.CONTENT_TYPE);
         try {
@@ -203,7 +203,7 @@ public class SizesTest {
             "\r\n" +
             "-----1234--\r\n";
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(-1);
         upload.setSizeMax(200);
 
@@ -236,7 +236,7 @@ public class SizesTest {
             "\r\n" +
             "-----1234--\r\n";
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        ServletFileUpload upload = new ServletFileUpload(new EncryptedFileItemFactory());
         upload.setFileSizeMax(-1);
         upload.setSizeMax(300);
 
